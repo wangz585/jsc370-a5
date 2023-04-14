@@ -302,7 +302,7 @@ map_2020 <- vote_count_2020 |>
     coloraxis = "coloraxis"
   ) |>
   layout(
-    title = "Vote Count in the USA",
+    title = "Number of Voters in the Presidential Elections",
     geo = list(
       scope = "usa",
       showlakes = TRUE,
@@ -347,7 +347,7 @@ titles <- list(
   )
 )
 subplot(map_1976, map_2000, map_2020, nrows = 3) |>
-  layout(coloraxis = list(colorscale = "Viridis"),
+  layout(coloraxis = list(colorscale = "Viridis", text = "population"),
          xaxis = list(visible = TRUE),
          annotations = titles)
 ```
@@ -372,9 +372,40 @@ usa_president_total<-merge(usa_president_total_dem,usa_president_total_rep,by="y
   add_lines(
     x = ~ year,
     y = ~ dem_votes,
+    name = "Democratic Party"
   ) |>
   add_lines(
     x = ~ year,
     y = ~ rep_votes,
-  )
+    name = "Republican Party",
+    line = list(color = 'red')
+  ) %>% layout(title = "Population Votes of Presidential Elections", xaxis = list(title = "Election Year"), yaxis = list(title = "Vote Count"))
+```
+
+
+```{r, warning=FALSE, message=FALSE, include=FALSE}
+usa_state_president_major_party <- usa_state_president %>%
+  group_by(state, year) %>%
+  summarize(dem_votes = mean(candidatevotes[party == "DEMOCRAT"]),
+            rep_votes = mean(candidatevotes[party == "REPUBLICAN"]),
+            diff_proportion = (dem_votes - rep_votes) / totalvotes) %>%
+  unique() %>%
+  select(state, year, diff_proportion) %>%
+  pivot_wider(names_from = year, values_from = diff_proportion) %>%
+  column_to_rownames("state") %>%
+  as.matrix()
+```
+
+```{r, echo=FALSE}
+#colorScale <- colorRamp(c("blue", "red"))
+
+plot_ly(
+  x = colnames(usa_state_president_major_party),
+  y = rownames(usa_state_president_major_party),
+  z = ~ usa_state_president_major_party,
+  type = "heatmap",
+  showscale = TRUE
+) |>
+  colorbar(title = "Winning Proportion \n(positive: DEM won)") %>% 
+  layout(title = list(text = "State Population Votes Heatmap"))
 ```
