@@ -351,3 +351,30 @@ subplot(map_1976, map_2000, map_2020, nrows = 3) |>
          xaxis = list(visible = TRUE),
          annotations = titles)
 ```
+
+```{r, include=FALSE}
+usa_president_total_dem <- usa_state_president %>%
+  subset(party_detailed == "DEMOCRAT") %>%
+  group_by(year) %>%
+  summarize(dem_votes = sum(candidatevotes))
+
+usa_president_total_rep <- usa_state_president %>%
+  subset(party_detailed == "REPUBLICAN") %>%
+  group_by(year) %>%
+  summarize(rep_votes = sum(candidatevotes))
+
+usa_president_total<-merge(usa_president_total_dem,usa_president_total_rep,by="year")
+```
+
+```{r, echo=FALSE}
+ usa_president_total |>
+  plot_ly() |>
+  add_lines(
+    x = ~ year,
+    y = ~ dem_votes,
+  ) |>
+  add_lines(
+    x = ~ year,
+    y = ~ rep_votes,
+  )
+```
