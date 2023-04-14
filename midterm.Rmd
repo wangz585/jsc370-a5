@@ -1,0 +1,823 @@
+---
+title: "Election in the United States"
+author: "Zhenyu Wang"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+---
+
+```{r, include=FALSE}
+# Table
+library(knitr)
+library(kableExtra)
+
+# Scrape
+library(rvest)
+library(httr)
+library(polite)
+
+# Data Clean
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(dplyr)
+
+# plot
+library(ggplot2)
+library(gridExtra)
+library(maps)
+library(usmap)
+library("transformr")
+library("gganimate")
+```
+
+## Introduction
+
+Democracy is the worst form of government except for all those other forms that have been tried from time to time.  —Sir Winston Leonard Spencer Churchill
+
+Democracy is often touted as the best system of governance, as it provides citizens with a voice in decision-making and a mechanism for holding their leaders accountable. However, the pattern of democracy varies greatly across different countries and regions, with some nations thriving under a robust democratic system while others struggle to maintain even the most basic democratic institutions. With the help of data science, we will explore the patterns of democracy across the globe. In particular, there are two democratic systems that are quite representative in the whole world.
+
+American democracy is often seen as a model for other countries around the world. The United States is one of the oldest and most stable democracies in the world, and its democratic institutions and traditions have been emulated by many other countries. However, American democracy has also faced challenges and criticisms, particularly in recent years. The country's deep political polarization and fairness of voting system have raised concerns about the health of American democracy. 
+
+
+Elections is the basement of any democratic systems around the world. They provide a mechanism for citizens to choose their representatives, participate in the political process, and hold their leaders accountable. Election is also a friendly way to use data science to analyze, as its data format is mostly numbers. 
+
+Therefore, we will look into election datasets for both countries and discover the pattern of their democratic systems in this report. In the first stage, we will focus on USA only as its information is profound enough. 
+
+## Data Prepare
+
+### Data Collection
+
+```{r, include=FALSE}
+usa_county_president <- read.table(
+  "~/Downloads/countypres_2000-2020.tab",
+  sep="\t", header=TRUE)
+
+usa_state_senate <- read.table(
+  "~/Downloads/1976-2020-senate.tab",
+  sep="\t", header=TRUE)
+
+usa_state_president <- read.table(
+  "~/Downloads/1976-2020-president.tab",
+  sep="\t", header=TRUE)
+```
+
+The USA election datasets we used are downloaded from [`Harvard Dataverse`](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX). There are 3 datasets for the USA, their basic information are desribed in the followring tables. We call dataset to in this way {country}_{level}_{office}, for example, `usa_county_president` means dataset president election in the United States, and voting counts are stored for each county.
+
+```{r, eval = FALSE, include=FALSE}
+dim(usa_state_president)
+min(usa_state_president$year)
+```
+
+```{r, echo=FALSE}
+myTable <- data.frame(Dataset = c("usa_county_president", "usa_state_senate", "usa_state_president"),
+                      `Numberof Rows` = c(72617, 3629, 4287),
+                      `Number of Columns` = c(12, 19, 15), 
+                      `Version` = c(20220315, 20210114, 20210113),
+                      `Year (Start)` = c(2000, 1976, 1976),
+                      `Year (End)` = c(2020, 2020, 2020))
+kable(myTable, "html", caption = "Table 1. Summary of the USA Election Datasets") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+
+```
+They stored in tab seperated format, we use `read.table` function in R to load them.
+
+Also, we use `httr` and `polite` R packages to scrape data about the winners in presidential election in the United States. Because of the [`Electoral College system`](https://en.wikipedia.org/wiki/United_States_Electoral_College) in the USA, the winner of population voting counts are not necessarily the winner, so we need to scrape them from wikipedia for more comprehensive analysis.
+
+```{r, include=FALSE}
+# To scrape data
+
+url <- "https://en.wikipedia.org/wiki/List_of_United_States_presidential_elections_by_popular_vote_margin"
+url_bow <- polite::bow(url)
+ind_html <-
+  polite::scrape(url_bow) %>%  # scrape web page
+  rvest::html_nodes("table.wikitable") %>% # pull out specific table
+  rvest::html_table(fill = TRUE) 
+election_winners <- 
+  ind_html[[2]] %>% 
+  clean_names()
+```
+
+### Dataset Clean
+
+We want to go through each column in three datasets, including some political terms.
+
+```{r, echo=FALSE}
+
+myTable <- data.frame(Dataset = c("USA_President_County", "USA_President_County", "USA_President_County", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State"),
+                      `Column` = c("{county, state}_fips", "version", "mode", "state_cen", "state_ic", "writein", "stage", "special"),
+                      Description = c("FIPS stands for 'Federal Information Processing Standard', 'County FIPS' refers to a unique code assigned by the federal government to each county in the United States and its territories", "Version of the datset, we use the newest (20220315)", "Voting Methods", "State Code for the US Census Bureau's geographic census center", "State identification code used by the Federal Election Commission (FEC) to identify political committees based in a particular state", "An voting option where a voter can manually write in the name of a candidate they wish to vote for, rather than selecting a pre-printed name on the ballot", "Stages of an election (general, primary, runoff)", "Special elections fill vacancies that occur when a member of the House of Representatives dies or resigns before the biennial general election"))
+kable(myTable, "html", caption = "Table 2. Description of Columns in the USA Election Datasets") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+```
+
+And also the data clean procedures:
+
+- Drop data points that are not useful
+  - Unofficial election results
+  - Invalid Ballot
+  - Columns that only contain a single value (See the table)
+
+```{r, echo=FALSE}
+myTable <- data.frame(Dataset = c("usa_county_president", "usa_state_senate", "usa_state_president"),
+                      `Columns` = c("office, version", "office, district, mode, version", "office, version, notes"))
+kable(myTable, "html", caption = "Table 3. Columns that only contain a single in the datasets") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+
+```
+  
+- Convert data types to numeric/boolean if possible
+
+
+```{r, include=FALSE, eval=FALSE}
+colnames(usa_state_president)
+subset(usa_state_senate, special == "True")
+unique(usa_state_senate$special)
+usa_state_senate$writein
+```
+
+
+```{r, include=FALSE}
+# Single columns
+single_value_cols <- function(df) {
+  df_single <- df %>% 
+    select_if(~n_distinct(.) == 1) %>% 
+    summarise_all(~unique(.))
+  
+  return(df_single)
+}
+```
+
+```{r, eval=FALSE, include=FALSE}
+df_list <- list(usa_county_president, usa_state_senate, usa_state_president)
+# Print the resulting data frames
+for (i in df_list) {
+  print(single_value_cols(i))
+}
+```
+
+
+```{r,  include=FALSE}
+# Drop uncessary columns, most columns here have the same value or dupliacted meeaning
+usa_county_president <- usa_county_president %>% select(-version)
+
+usa_state_senate <- usa_state_senate %>% select(-state_fips, -state_cen, -state_ic, -district, -version)
+
+usa_state_president <- usa_state_president %>% select(-state_fips, -state_cen, -state_ic, -version, -notes)
+
+# Drop uncessary rows
+usa_state_senate <- subset(usa_state_senate, unofficial == "False")
+usa_state_senate <- usa_state_senate %>% select(-unofficial)
+```
+
+- We also clean up the election winner dataset (scraped from wikipedia) to contains two columns only for simplicity, the year of the elelction and the winning party.
+
+```{r, include=FALSE}
+election_winners$national_DEMOCRAT_win = election_winners$winner_and_party_2 == "Dem."
+election_winners$year = election_winners$election
+election_winners <- election_winners %>% 
+  tail(12) %>% 
+  select(year, national_DEMOCRAT_win)
+election_winners$year <- as.integer(election_winners$year)
+
+ind_tab <- election_winners
+```
+
+```{r, echo=FALSE}
+kable(election_winners, "html", caption = "Table 4. National Winner of Presidential Election in the United States") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE
+                )
+  
+```
+
+- Merge Datasets that shared the same attributes for easier future analysis
+  - `usa_president_result`: A dataset that contains president election result in both state and county level. Notice that, for data point in state level, we set `county_name` to be `NaN` for simplicty.
+  - `usa_state_level_result`: A dataset that contains both senate and presidential election results, but only in state level.
+  
+```{r, include=FALSE}
+# Have a common dataset with common attributes for simpler future analysis
+common_col_names = c("year", "state", "candidate", "party_detailed", "candidatevotes", "totalvotes", "office")
+usa_state_level_result <- rbind(usa_state_senate[, common_col_names], usa_state_president[, common_col_names])
+```
+
+```{r, include=FALSE}
+# Have a common 
+usa_state_president$county_name = NaN
+usa_state_president$county_fips = NaN
+usa_state_president$party = usa_state_president$party_simplified
+common_col_names = c("year", "state", "county_name", "candidate", "party", "candidatevotes", "totalvotes", "office", "county_fips")
+usa_president_result <- rbind(usa_county_president[, common_col_names], usa_state_president[, common_col_names])
+```
+
+```{r, echo=FALSE}
+kable(head(usa_state_level_result,n = 5), "html", caption = "Table 5. Example of usa_state_level_result dataset") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+```
+
+```{r, echo=FALSE}
+kable(head(usa_president_result,n=5), "html", caption = "Table 6. Example of usa_president_result dataset") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+```
+
+- Create a new dataframe winning party in each county/state by comparing votes.
+
+```{r, include=FALSE}
+# Create data frame of county winner
+usa_president_winner_county <- usa_president_result %>% 
+  subset(party == "DEMOCRAT"| party == "REPUBLICAN")%>% 
+  group_by(year, state, county_name) %>% 
+  summarize(dem_votes = mean(candidatevotes[party == "DEMOCRAT"]),
+            rep_votes = mean(candidatevotes[party == "REPUBLICAN"]),
+            diff = (dem_votes - rep_votes),
+            DEMOCRAT_win = diff > 0) %>%
+  unique()
+```
+
+
+## Data Exploration
+
+Data exploration of USA election data can provide valuable insights into the patterns and trends of American voting behavior. By analyzing various factors such as voter turnout, demographic characteristics, and geographic distribution of votes, we can gain a deeper understanding of how elections are won and lost in the United States. We are going to perform the data exploration through answering the following questions.
+
+- Are there any minor political parties in the USA, what is their importance through out the years?
+- What is the temporal dynamics or patterns of thes elections?
+- What are some "battle states", "bellwether states", "safe states" in the elections?
+
+These questions will cover 3 perspectives of the elections: organizational, temporal and spatial.
+
+### Minor Political Parties
+
+In the United States, there are a number of minor political parties that operate alongside the two major parties, the Democratic and Republican parties. These minor parties often represent specific ideologies or issues that are not fully addressed by the major parties. It is commmonly argued that these parties generally have little chance of winning any elections. 
+
+```{r, include=FALSE}
+usa_state_level_parties_count <- usa_state_level_result %>% 
+  select(year, party_detailed, office) %>% 
+  unique() %>% 
+  group_by(year, office) %>% 
+  summarise(count = n())
+usa_state_level_parties_count
+```
+
+
+```{r, include=FALSE}
+# How much proportion do small parties get votes
+usa_state_level_small_parties_votes <- usa_state_senate %>% 
+  subset(party_detailed != "REPUBLICAN" & party_detailed != "DEMOCRAT") %>%
+  select(year, candidatevotes) %>% 
+  group_by(year) %>% 
+  summarise(sum = sum(candidatevotes))
+```
+
+```{r, include=FALSE}
+# Total votes every year
+usa_state_level_total_votes <- usa_state_senate %>% 
+  select(year, state, totalvotes) %>%
+  unique() %>%
+  group_by(year) %>% 
+  summarise(total = sum(totalvotes))
+```
+
+```{r, include=FALSE}
+usa_state_level_small_parties_votes <- merge(usa_state_level_small_parties_votes, usa_state_level_total_votes, by = "year")
+
+usa_state_level_small_parties_votes$proportion = usa_state_level_small_parties_votes$sum / usa_state_level_small_parties_votes$total
+```
+
+```{r, echo=FALSE, warning=FALSE}
+## Number of parties partipated every year
+# Load ggplot2 package
+
+# Create line plot with ggplot2
+ggplot() +
+  geom_line(data = usa_state_level_parties_count, aes(x = year, y = count), size = 1) +
+  ggtitle("Figure 1. Number of Minor Parties in the elections (presidential and sanate)") +
+  xlab("Year of the election") +
+  ylab("Number of Parties")
+```
+
+From the figure 1, we can tell that there were more than 20 parties particpating in every election. The peak number of parties participating elections would be above 40. Notice that this figure includes both senate and presidential election, so there is some fluncation pattern. We can tell from this pattern that more parties participating in the presidential elections than the senate elections.
+
+
+```{r, echo=FALSE}
+# Create line plot with ggplot2
+ggplot() +
+  geom_line(data = usa_state_level_small_parties_votes, aes(x = year,y = proportion), size = 1) +
+  ggtitle("Figure 2.Proportion of Votes of Minor Parties in the election (senate)") +
+  xlab("Year of the election") +
+  ylab("Proprotion of Total Votes")
+```
+
+Firgure 2 depecits the proportion of votes that the minor parties got from the senate elections. From this figure, we can tell that despite more than 20 parties participating in the election, but it is hard for them to get even more than 1% population votes. So we can verify that minor parties are mostly negligible.
+
+```{r, echo=FALSE}
+usa_state_level_small_parties_votes <- usa_state_president %>% 
+  subset(party_detailed != "REPUBLICAN" & party_detailed != "DEMOCRAT" & office != "US SENATE") %>%
+  select(year, candidatevotes, totalvotes) %>% 
+  group_by(year) %>% 
+  summarise(votes = sum(candidatevotes))
+```
+
+```{r, echo=FALSE}
+ggplot() +
+  geom_line(data = usa_state_level_small_parties_votes, aes(x = year,y = votes), size = 1) +
+  ggtitle("Figure 3. Voting count of Votes of Minor Parties in the election (presidential)") +
+  xlab("Year of the election") +
+  ylab("Proprotion of Total Votes")
+```
+
+Firgure 3 depecits the voting count of the minor parties got from the presidential elections. Surprisingly, in 1992, minor party candidates got about 20,000,000 population votes, which is an outlier in this figure. And we want to look into this year in details.
+
+
+```{r, echo=FALSE}
+president_level_result_1992 <- usa_state_president %>%
+  subset(year == 1992) %>%
+  select(party_detailed, candidatevotes, candidate) %>% 
+  group_by(party_detailed) %>% 
+  summarise(total = sum(candidatevotes),
+            candidate = candidate[1])
+
+kable(tail(president_level_result_1992[order(president_level_result_1992$total), ], n = 4), caption = "Table 7. Presidential Election Result in 1992", "html") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+
+```
+
+![Ross Perot](//Users/apple/R/ross.webp)
+From table 7, we can tell that independent candidate Perot Ross got 19,829,462 population votes in total. He was a businessman and political candidate. He focused on reducing the national debt, promoting free trade, and government reform. From this, we can tell that these issues are very trendy at that time. This campaign served as a notable example of third-party candidates in American politics. 
+
+In general, despite the limited success in winning elections, minor parties and independent candidates have had an impact on American politics by raising awareness about specific issues and pushing the major parties to adopt certain policies or take a stand on certain issues. There are outliers like Perot Ross who could take advantage of political situation and personal charisma, wrote a remarkable chapter in the United States democratic history.
+
+### Dynamics of Elections
+
+This part focus on temporal dynamic of election result using map. The temporal dynamic of US elections refers to how the patterns and behaviors of voters, campaigns, and outcomes change over time across various election cycles. Understanding the temporal dynamics of US elections is important for predicting and interpreting election outcomes, as well as for explaining the success or failure of the democracy in the United States.
+
+#### Presidential Election
+
+```{r, include=FALSE}
+# Load population data by state
+data(statepop)
+
+usa_state_president_major_party <- usa_state_president %>%
+  group_by(state, year) %>%
+  summarize(dem_votes = mean(candidatevotes[party == "DEMOCRAT"]),
+            rep_votes = mean(candidatevotes[party == "REPUBLICAN"]),
+            diff_proportion = (dem_votes - rep_votes) / totalvotes) %>%
+  unique()
+
+# Merge population data with state boundaries
+# Load state boundaries
+map_data <- map_data("state")
+
+map_data$region <- toupper(map_data$region)
+
+usa_state_president_major_party <- left_join(map_data, usa_state_president_major_party, by = c("region" = "state"))
+```
+
+```{r, eval=FALSE, include=FALSE}
+# Create choropleth map of population by state
+ggplot(subset(usa_state_president_major_party, year == 1976), aes(x = long, y = lat, group = group, fill = diff_proportion)) +
+  geom_polygon() +
+  scale_fill_continuous(high = "blue", low = "white"
+, limits = c(-0.5, 0.5), breaks = c(-0.5, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5)) +
+  labs(title = "USA Population by State", fill = "Population") +
+  theme_void()
+```
+
+
+```{r, eval=FALSE, include=FALSE}
+# Create choropleth map of population by state
+ggplot(subset(usa_state_president_major_party, year == 2020), aes(x = long, y = lat, group = group, fill = diff_proportion)) +
+  geom_polygon() +
+  scale_fill_continuous(high = "blue", low = "white"
+, limits = c(-0.5, 0.5), breaks = c(-0.5, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5)) +
+  labs(title = "USA Population by State", fill = "Population") +
+  theme_void()
+```
+
+```{r, include=FALSE}
+# animation
+map_plot <- ggplot(usa_state_president_major_party, aes(x=long, y=lat, group=group, fill = diff_proportion)) +
+  geom_polygon() +
+  scale_fill_continuous(high = "blue", low = "white"
+, limits = c(-0.5, 0.5), breaks = c(-0.5, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.5)) +
+  theme_void()
+
+# animate the plot by year (assuming the dataset has a "year" column)
+anim_map <- map_plot +
+  transition_states(year, transition_length = 1, state_length = 1) +
+  labs(title = "Animation 1. Heatmap of states voting difference between two major parties (year: {closest_state})")
+```
+
+```{r, echo=FALSE}
+animate(anim_map, nframes = 50, fps = 10)
+```
+
+The animation 1 is a heatmap that visualized dynamics of presidential election results by each state. The color indicates the the difference voting proportions between the democratic party and the republian party. The deeper color it has, the more votes democratic party won. In general, we can see that the dynamics of election results differed state by state. It is affected by both big weather in the election year and the local condition itself. From example, if we zoom in 1984 presidential election, the whole map is in a light color, which means the republican party won this election by a landslide.
+
+When we look into 1984, President Ronald Reagan win re-election in a landslide over Democratic challenger Walter Mondale. Reagan won 49 out of 50 states and carried 58.8% of the popular vote. The election is notable for being one of the largest electoral landslides in American history.
+
+As the heatmap is plot with continous color (by voting proportion difference), we can tell if the transitions between elections are smooth. In general, the transitions are continous, as there is no big jump from light color to deep color in a single time stamp. And the transitions (not the result) of each state in general formed and matched with the whole country.
+
+```{r, include=FALSE}
+usa_state_president_major_party$`Winner Party` =  ifelse(usa_state_president_major_party$diff_proportion > 0, "Democratic", "Republican")
+```
+
+```{r, eval=FALSE, include=FALSE}
+# Create choropleth map of population by state
+ggplot(subset(usa_state_president_major_party, year == 2020), aes(x = long, y = lat, group = group, fill = `Winner Party`)) +
+  geom_polygon() +
+  labs(title = "USA Population by State", fill = "Winner Party") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_void()
+```
+
+
+```{r, include=FALSE}
+# animation
+map_plot <- ggplot(subset(usa_state_president_major_party), aes(x = long, y = lat, group = group, fill = `Winner Party`)) +
+  geom_polygon() +
+  labs(title = "USA Population by State", fill = "Winner Party") +
+  scale_fill_manual(values = c("blue", "red")) +
+  theme_void()
+
+# animate the plot by year (assuming the dataset has a "year" column)
+anim_map <- map_plot +
+  transition_states(year, transition_length = 1, state_length = 1) +
+  labs(title = "Animation 2. Winner of presidential election in each state (year: {closest_state})")
+```
+
+```{r, echo=FALSE}
+animate(anim_map, nframes = 50, fps = 10)
+```
+
+The animation 2 is visualized dynamics of presidential election results by each state, with only the information about the winner included. One interesting observation is that if a state changed its election outcome (for example, red->blue), it is very likely that its neighboring states also changed their outcome in this election. Or its neighboring states have already been in blue color the previous election result. 
+
+From this, we may conclude that the political weather is in one state is highly correlated with its neighboring states. States may share political and social ties with their neighbors, such as common cultural backgrounds, shared histories, or migration patterns. 
+
+
+```{r, include=FALSE}
+usa_president_total <- usa_state_president %>%
+  subset(party_detailed == "DEMOCRAT"| party_detailed == "REPUBLICAN") %>%
+  group_by(year, party_detailed) %>%
+  summarize(votes = sum(candidatevotes))
+```
+
+```{r, include=FALSE, echo=FALSE}
+# Grouped
+p1 <- ggplot(usa_president_total, aes(fill=party_detailed, y=votes, x=year)) + 
+     ggtitle("Figure 4.1 Voting count of presidential elections (1976~2020)") + 
+  scale_fill_manual(values = c("blue", "red")) + 
+    geom_bar(position="dodge", stat="identity")
+```
+#### Senate Election
+
+
+```{r, include=FALSE, warning=FALSE,messages=FALSE}
+# What if we look at senate election only 
+usa_senate_total <- usa_state_senate %>% 
+  subset(party_detailed == "DEMOCRAT"| party_detailed == "REPUBLICAN") %>%
+  group_by(year, party_detailed) %>%
+  summarize(votes = sum(candidatevotes), .groups = "drop")
+
+p2 <- ggplot(usa_senate_total, aes(fill=party_detailed, y=votes, x=year)) + 
+  ggtitle("Figure 4.2 Voting count of senate elections (1976~2020)") + 
+  scale_fill_manual(values = c("blue", "red")) + 
+    geom_bar(position="dodge", stat="identity")
+```
+```{r, echo=FALSE}
+grid.arrange(p1, p2, nrow = 2)
+```
+In this section, we ploted population voting count in the whole country in bar plots. Figure 4.1 is for the presidential election, and figure 4.2 is for the senate election. We can tell that after 2008, democratic party always gain more population votes (not necessarily won) in presidential election. And we can also see a increasing trend of total voting population in the presidential election.
+
+As for the senate election, we can see that different states held election depending on depending on different year. We did not group them, and this is one limitation of this data analysis. But we can still tell that democratic parties take more advantage in recent year, and this is a question worthwhile to investigate in.
+
+#### Midterms
+
+In the United States, a midterm election is a type of election that occurs halfway through the four-year term of a sitting President. Midterm elections are held between two presidential elections, and they serve as an opportunity for voters to elect members of Congress, including all 435 seats in the House of Representatives and one-third of the 100 seats in the Senate. In this data analysis, we focus on the Senate election part. For example, 2016 senator election is a midterm for 2014 ~ 2018 presidency.
+
+Midterm elections are an important part of the American political system, as they provide an opportunity for voters to weigh in on important issues and shape the direction of the country for the remainder of the President's term. By looking at midterm elections, we can see if people are generally satisfied with the governance in past two years. 
+
+```{r, include=FALSE}
+usa_state_level_result$round = usa_state_level_result$year %/% 4
+
+midterm <- usa_state_level_result %>%
+  subset((year %% 4 == 2 & office == "US SENATE") | (year %% 4 == 0 & office == "US PRESIDENT"))
+
+midterm <- midterm %>%
+  group_by(state, year) %>%
+  summarize(dem_votes = mean(candidatevotes[party_detailed == "DEMOCRAT"]),
+            rep_votes = mean(candidatevotes[party_detailed == "REPUBLICAN"]),
+            round = mean(round),
+            DEMOCRAT_win = dem_votes > rep_votes) %>% 
+  group_by(round, state) %>%
+  mutate(win = DEMOCRAT_win != lag(DEMOCRAT_win)) %>%
+  na.omit() %>%
+  select(state, year, win)
+```
+
+```{r, echo=FALSE}
+
+midterm_year <- midterm %>% 
+  group_by(year) %>%
+  summarize(num_flips = sum(!win))
+
+ggplot() +
+  geom_line(data = midterm_year, aes(x = year,y = num_flips), size = 1) +
+  ggtitle("Figure 5. Number of states got 'flipped over' in the 'midterms'") +
+  xlab("Year of the (senate) election") +
+  ylab("Number of States")
+```
+In figure 5, we plotted number of states that were flipped-over in the midterm election. That is, their midterm senator election result is different with the presidential election results. And we can tell that the number of flipping over states is increasing with the time. In general, there are about 20 states got flipped over in midterm elections.
+
+```{r, include=FALSE}
+# State get flipped
+midterm_flipps_state <- midterm %>% 
+  group_by(state) %>%
+  summarize(num_flips = sum(!win))
+
+midterm_flipps_state <- left_join(map_data, midterm_flipps_state, by = c("region" = "state"))
+```
+
+
+```{r, echo=FALSE}
+ggplot(midterm_flipps_state, aes(x = long, y = lat, group = group, fill = num_flips)) +
+  geom_polygon() +
+  labs(title = "Figure 6. Number of 'midterms' got 'flipped over' in states(1976 ~ 2020)", fill = "Number of Flips") +
+  scale_fill_continuous(low = "white", high = "red") +
+  theme_void()
+```
+
+```{r, include=FALSE}
+midterm <- left_join(map_data, midterm, by = c("region" = "state"))
+midterm$`Midterm Status` = ifelse(midterm$win, "Flipped Over", "Stayed the Same")
+
+
+# Create choropleth map of population by state
+map_plot <- ggplot(midterm, aes(x = long, y = lat, group = group, fill = `Midterm Status`)) +
+  geom_polygon() +
+  labs(title = "USA Population by State", fill = "Midterm Status") +
+  scale_fill_manual(values = c("pink", "grey")) +
+  theme_void()
+
+# animate the plot by year (assuming the dataset has a "year" column)
+anim_map <- map_plot +
+  transition_states(year, transition_length = 1, state_length = 1) +
+  labs(title = "Animation 3. States got flipped over in the 'midterm' (year: {closest_state})")
+```
+
+```{r, echo=FALSE, warning=FALSE}
+animate(anim_map, nframes = 50, fps = 10)
+```
+
+Also, from figure 6 and animation 3, we see the geographic trend of flipping over in the midterm elections. In general, states had high chances to be flipped over in the midterm elections. The different voting system and strategy between presidential election could be one reason, people always argue the so-called "Presidential Penalty": the tendency for voters to hold the President's party accountable for the country's problems and express their dissatisfaction at the ballot box.
+
+
+### Bellwether states, Battle States, Safe States
+
+The USA is a federal republic consisting of 50 states, each with its own unique history, culture, and identity. In election, different states tend to have different pattern. For example, California is well-known for its strong support for democratic party recent years, while Texas is like a base for republican party. We want to investigate local pattern through finding Bellwether states, Battle states, and Safe states. They are terms used to describe different categories of states in the United States during presidential elections.
+
+```{r, include=FALSE, warning=FALSE}
+# Create data frame of county winner
+usa_president_winner_county <- usa_president_result %>% 
+  subset(party == "DEMOCRAT"| party == "REPUBLICAN")%>% 
+  group_by(year, state, county_name, county_fips) %>% 
+  summarize(dem_votes = mean(candidatevotes[party == "DEMOCRAT"]),
+            rep_votes = mean(candidatevotes[party == "REPUBLICAN"]),
+            diff = (dem_votes - rep_votes),
+            DEMOCRAT_win = diff > 0) %>%
+  unique()
+```
+
+```{r, include=FALSE}
+# Join the True winner table with this
+national_winner <- ind_tab %>% 
+  tail(12) %>% 
+  select(year, national_DEMOCRAT_win)
+
+national_winner$year <- as.integer(national_winner$year)
+usa_president_winner_county <- merge(national_winner, usa_president_winner_county, by = "year")
+usa_president_winner_county$matches_national_winner = usa_president_winner_county$DEMOCRAT_win == usa_president_winner_county$national_DEMOCRAT_win
+```
+
+```{r, include=FALSE}
+usa_president_winner_county %>%
+  subset(`county_name` == "DISTRICT OF COLUMBIA")
+```
+
+#### Bellwether states
+
+Bellwether states are states that have a history of accurately predicting the outcome of presidential elections. These states are considered to be representative of the overall political mood of the country and are closely watched by political analysts and strategists.
+
+```{r, include=FALSE}
+num_matches_president_county <- usa_president_winner_county %>%
+  group_by(state, county_name, county_fips) %>%
+  summarize(num_matches =  sum(matches_national_winner))
+```
+
+```{r, echo=FALSE}
+# Create a histogram plot using ggplot2
+ggplot(data = subset(num_matches_president_county, county_name != NaN), aes(x = num_matches)) + 
+  geom_histogram(bins = 10) +
+  ggtitle("Figure 8. Distribution of numbers of election that counties had the same result as the nation (2000-2020)")
+```
+
+
+Figure 6 illustrated counties in the United States that have the same results as the presidential election in 2000-2020. We can see that most counties had 3 matches. This is not surprising, as we will see in the next section, most conties are stable (safe counties), and both democratic party and republican party won 3 elections in past 6 elections. And there 8 counties that had the same output as the national level elections (see table 8).
+
+```{r, include=FALSE}
+num_matches_president_county<-num_matches_president_county[order(num_matches_president_county$num_matches),]
+```
+
+```{r, echo=FALSE}
+kable(subset(num_matches_president_county, county_name != NaN & num_matches > 5), caption = "Table 8. Counties that has the same winner as the national winner (2000-2020)","html") %>%
+  kable_styling(bootstrap_options = "striped", 
+                full_width = FALSE)
+
+```
+
+
+```{r, echo=FALSE}
+kent_county <- usa_president_winner_county %>%
+  subset(county_name == "KENT" & state == "DELAWARE") %>%
+  select(year, state, county_name, dem_votes, rep_votes, national_DEMOCRAT_win, DEMOCRAT_win)
+kent_county$county_winner = ifelse(kent_county$DEMOCRAT_win, "Democratic", "Republican")
+kent_county$national_winner = ifelse(kent_county$national_DEMOCRAT_win, "Democratic", "Republican")
+kent_county <- kent_county %>% select(-c("national_DEMOCRAT_win", "DEMOCRAT_win"))
+kable(kent_county, caption = "Table 9. Election Result in KENT, DELAWARE (2000-2020)", "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+In table 9, we can take a closer look at Kent, Delaware. We can see no party can win by a landslide in every election. The structure of voting population in this county is pretty balance. 
+
+```{r, echo=FALSE}
+good_counties <- subset(num_matches_president_county, county_name != NaN & num_matches > 5)
+good_counties$fips = as.character(good_counties$county_fips)
+good_counties$county_match_national = TRUE
+
+
+# create a data frame with state and county names
+
+# get the data set with population data
+data("uspop")
+# plot the selected counties on a US map
+plot_usmap(data = good_counties,values = c("county_match_national") , color = "black") +
+  labs(title = "Figure 9. Counties that has the same presidential election results (2000-2020)")
+
+```
+
+In figure 9, we plotted the locations of these counties. And surprisingly, all 8 counties are in north part of the United States. Maybe this is next question to investigate in (why these counties are all in the North, what are some common features of them).
+
+```{r, echo=FALSE}
+# Create a histogram plot using ggplot2
+ggplot(data = subset(num_matches_president_county, county_name == NaN), aes(x = num_matches)) + 
+  geom_histogram(bins = 12) +
+  ggtitle("Figure 10. States that has the same presidential election results (1976-2020)")
+```
+
+```{r, echo=FALSE}
+ohio_state <- usa_president_winner_county %>%
+  subset(county_name == NaN & state == "OHIO") %>%
+  select(year, state, dem_votes, rep_votes, national_DEMOCRAT_win, DEMOCRAT_win)
+ohio_state$county_winner = ifelse(ohio_state$DEMOCRAT_win, "Democratic", "Republican")
+ohio_state$national_winner = ifelse(ohio_state$national_DEMOCRAT_win, "Democratic", "Republican")
+ohio_state <- ohio_state %>% select(-c("national_DEMOCRAT_win", "DEMOCRAT_win"))
+kable(ohio_state, caption = "Table 10. Election Result in OHIO state (1976-2020)", "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+Figure 10 and Table 10 illustrated the bellwether states (in real state level). From figure 10, we can see all states matched at at least 6 national level election outcomes. And most of them had 6-9 matches. There is only one lucky state that matched every outcome from 1976-2020. Ohio is an important state is a key swing state in presidential elections. It has a diverse population, with urban, suburban, and rural areas, and a mix of conservative and liberal voters. This has made Ohio a track record of accurately predicting the outcome of presidential elections.
+
+```{r, eval=FALSE,include=FALSE}
+library(usmap)
+# https://jtr13.github.io/cc19/different-ways-of-plotting-u-s-map-in-r.html
+# Load county boundaries dataset
+data("usmap")
+
+# Create map of county boundaries
+plot_usmap(regions = "counties") + 
+  labs(title = "U.S. counties",
+       subtitle = "This is a blank map of the United States.") + 
+  theme(panel.background=element_blank())
+```
+
+
+### Battle States, Safe States
+
+A "safe state" is a state where one political party consistently wins the majority of votes in presidential elections. These states are often referred to as "solid" or "secure" for one party. On the other hand, a "battle state" is a state where the outcome of the election is less predictable and where the two major political parties are competitive in terms of vote share. Notice that "battle state" is similar to "bellwether states" given the swing presidential election results recent years.
+
+```{r, include=FALSE}
+num_turning_points <- function(year, result) {
+  order_result = result[order(year)]
+  prev = order_result[1]
+  turning_count = 0
+  for (i in 1:length(order_result)) {
+    # do something with vec[i]
+    if (order_result[i] != prev){
+      turning_count = turning_count + 1
+      prev = order_result[i]
+    }
+  }
+  return(turning_count)
+}
+
+```
+
+```{r, include=FALSE}
+num_turning_points_county <- usa_president_winner_county %>%
+  subset(year > 1999) %>%
+  group_by(state, county_name, county_fips) %>%
+  summarize(num_turning_points = num_turning_points(year, DEMOCRAT_win),
+            result = sum(DEMOCRAT_win))
+```
+
+```{r, echo=FALSE}
+ggplot(data = subset(num_turning_points_county, county_name != NaN & num_turning_points < 10), aes(x = num_turning_points)) +
+  geom_histogram(binwidth=0.5) +
+  ggtitle("Figure 11. Distribution of number of turn-overs in each county in presidential election (2000-2020)")
+```
+
+In this section, we define a "turn-over". A "turn-over" means the election result got flipped over. Let's say from  year 1-5, the winning party for state X is D, D, R, R, D, the number of turn-overs is 2 (2nd year -> 3rd year; 4th year -> 5th year). And we use this quantity to determine if a state is battle ground or a safe state.
+
+Figure 11 illustrated distribution of number of turn-overs in each county in presidential election. The result is straightforward that most counties only voted for one party from 2000-2020 and had no turn-overs.
+
+```{r, echo=FALSE}
+good_counties <- subset(num_turning_points_county, county_name != NaN & num_turning_points  == 0)
+good_counties$fips = as.character(good_counties$county_fips)
+good_counties$winner_party = ifelse(good_counties$result == 0, "Republican", "Democratic")
+
+# create a data frame with state and county names
+
+# get the data set with population data
+data("uspop")
+# plot the selected counties on a US map
+plot_usmap(data = good_counties,values = c("winner_party") , color = "black") +
+  labs(title = "Figure 12. Counties had the same presidential election results (2000-2020)") +
+  scale_fill_manual(values = c("blue", "red"))
+
+```
+
+We visualized their location in Figure 12. Not surprisingly, the middle part if covered with red, but boundaries are covered with blue. This means most part of the United States has been stablized in county level.
+
+```{r, echo=FALSE}
+ggplot(data = subset(num_turning_points_county, county_name == NaN), aes(x = num_turning_points)) +
+  ggtitle("Figure 13. Distribution of number of turn-overs in each state in presidential election (2000-2020)") + 
+  geom_histogram(binwidth=0.5)
+```
+
+In figure 13, we illustrated distribution of number of turn-overs in each state in presidential election. We can say that most parties did not have any turn overs. Once a state has established a consistent voting pattern, it can be self-reinforcing, as voters tend to identify with a particular party and vote accordingly in future elections.
+
+```{r, eval=FALSE, include=FALSE}
+# double check is the result is correct
+num_turning_points_county %>% 
+  subset(county_name != NaN &num_turning_points > 3 & num_turning_points < 10 )
+```
+
+```{r, echo=FALSE}
+franklin_county <- usa_president_winner_county %>%
+  subset(county_name == "PINELLAS" & state == "FLORIDA" & year > 1999) %>%
+  select(year,county_name,  state, dem_votes, rep_votes, national_DEMOCRAT_win, DEMOCRAT_win)
+franklin_county$county_winner = ifelse(franklin_county$DEMOCRAT_win, "Democratic", "Republican")
+franklin_county$national_winner = ifelse(franklin_county$national_DEMOCRAT_win, "Democratic", "Republican")
+franklin_county <- franklin_county %>% select(-c("national_DEMOCRAT_win", "DEMOCRAT_win"))
+kable(franklin_county, caption = "Table 11. Election Result in PINELLAS, FLORIDA state (2000-2020)", "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+```{r, eval=FALSE, include=FALSE}
+# double check is the result is correct
+num_turning_points_county %>% 
+  subset(county_name == NaN &num_turning_points > 2 & num_turning_points < 10 )
+```
+
+```{r, echo=FALSE}
+franklin_county <- usa_president_winner_county %>%
+  subset(county_name == NaN & state == "IOWA" & year > 1999) %>%
+  select(year, state, dem_votes, rep_votes, national_DEMOCRAT_win, DEMOCRAT_win)
+franklin_county$county_winner = ifelse(franklin_county$DEMOCRAT_win, "Democratic", "Republican")
+franklin_county$national_winner = ifelse(franklin_county$national_DEMOCRAT_win, "Democratic", "Republican")
+franklin_county <- franklin_county %>% select(-c("national_DEMOCRAT_win", "DEMOCRAT_win"))
+kable(franklin_county, caption = "Table 12. Election Result in IOWA state (2000-2020)", "html") %>%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+Among all these "safe states", Iowa and Pinellas, Florida are two outliers in state level and county level. In table 11 and 12, we saw their presidential election results from 2000-2020. Although they are not bellwether states (they changed, but in an opposite way). We can also see that no party can win by a large amount too.
+
+The USA and many other democratic countries had the trend that states/counties consistently vote for the same party, this could lead to the trend a lack of balance in the government. Additionally, political polarization and the tendency of people to seek out information that confirms their existing beliefs can make it difficult to bridge the divide between parties and promote a diversity of perspectives.
+
+## Conclusions
+
+In this report, we have completed the data prepare and data exploration of the United States election data through answering three key questions. Through the data exploration, we had a better understanding on each level of the election system and its temporal and spatial dynamics. We have also learned about the recent events in the elections including famous politicians and social issues.  
+
+We have some main findings on election dynamics. Two major parties are still dominating elections most of times, where other independent candidates or minor parties were not able to change the status quo. In recent election, the Democratic party was having more population votes, but due to the electoral college system, this advantage may not turn into the real victory. There are some patterns we can tell from the change of the election map. From example, the changes of voting count were "continuous" and neighboring regions were more likely to have impacts on each other. The majority of the states and the counties are "safe states", only a few regions are really making a difference to the national level election results. 
+
+Despite of all these findings, the American election system is a complex and multi-layered process that can be difficult to fully understand just like the democratic system itself.
+
+## Limitations and Future Steps
+
+There are many limitations in this report. I will list the most important ones. First, most of the findings focus on the population winner of the election, but it is the electoral college system determined the winner. Second, different states held their senator elections in different years (because it is held every 6 years), however, we did not group them by their year of election, some results could be misleading. Third, we focus mostly on which party won the election instead of the candidates which could be very important in determining the election outcomes.
+
+In the future, we want to look into above limitations. Also, compare and contrast the results between the United States and India. Indian democracy is the world's largest democracy and has been an important model for many other countries and has inspired other developing countries, particularly in South Asia and Africa, and the country has been active in promoting democratic values and institutions globally. However, according to some [analysis](https://www.journalofdemocracy.org/articles/indias-endangered-democracy/), Indian's political system is failing due to corruption, caste discrimination, religious tensions, and electoral violence. By looking at two examples, we will gain a more comprehensive view on the world's democracy.

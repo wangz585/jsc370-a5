@@ -2,4 +2,4 @@
 title: "About This Website"
 ---
 
-More about this website.
+Created by Zhenyu Wang

@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="generator" content="pandoc" />
+
+        <meta name="author" content="Zhenyu Wang" />
+    
+    
+    <title>Election in the United States</title>
+
+        <script src="site_libs/header-attrs-2.19/header-attrs.js"></script>
+        <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link href="site_libs/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+        <script src="site_libs/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+        <script src="site_libs/navigation-1.1/tabsets.js"></script>
+        <link href="site_libs/readthedown-0.1/readthedown.css" rel="stylesheet" />
+        <link href="site_libs/readthedown-0.1/readthedown_fonts_embed.css" rel="stylesheet" />
+        <script src="site_libs/readthedown-0.1/readthedown.js"></script>
+        <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+        <link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    
+    
+    
+    
+    <!-- tabsets -->
+    <script>
+      $(document).ready(function () {
+	  window.buildTabsets("toc");
+      });
+      $(document).ready(function () {
+	  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+	      $(this).parent().toggleClass('nav-tabs-open')
+	  });
+      });
+    </script>
+
+    <!-- code folding -->
+    
+    <!-- code download -->
+    
+    <!-- tabsets dropdown -->
+
+    <style type="text/css">
+      .tabset-dropdown > .nav-tabs {
+	  display: inline-table;
+	  max-height: 500px;
+	  min-height: 44px;
+	  overflow-y: auto;
+	  background: white;
+	  border: 1px solid #ddd;
+	  border-radius: 4px;
+      }
+      
+      .tabset-dropdown > .nav-tabs > li.active:before {
+	  content: "";
+	  font-family: 'Glyphicons Halflings';
+	  display: inline-block;
+	  padding: 10px;
+	  border-right: 1px solid #ddd;
+      }
+      
+      .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+	  content: "&#xe258;";
+	  border: none;
+      }
+      
+      .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+	  content: "";
+	  font-family: 'Glyphicons Halflings';
+	  display: inline-block;
+	  padding: 10px;
+	  border-right: 1px solid #ddd;
+      }
+      
+      .tabset-dropdown > .nav-tabs > li.active {
+	  display: block;
+      }
+
+      .tabset-dropdown > .nav-tabs > li.active a {
+  	  padding: 0 15px !important;
+      }
+
+      .tabset-dropdown > .nav-tabs > li > a,
+      .tabset-dropdown > .nav-tabs > li > a:focus,
+      .tabset-dropdown > .nav-tabs > li > a:hover {
+	  border: none;
+	  display: inline-block;
+	  border-radius: 4px;
+	  background-color: transparent;
+      }
+      
+      .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+	  display: block;
+	  float: none;
+      }
+      
+      .tabset-dropdown > .nav-tabs > li {
+	  display: none;
+	  margin-left: 0 !important;
+      }
+    </style>
+    
+</head>
+
+<body class="preload">
+
+   	
+         <!-- readthedown start -->   
+   <div id="content" data-toggle="wy-nav-shift">
+     <nav id="nav-top" role="navigation" aria-label="top navigation">
+       <a role="button" href="#" data-toggle="wy-nav-top"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
+     </nav>
+         
+   
+      
+      <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">U.S Election</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li>
+        <a href="index.html">Home</a>
+      </li>
+      <li>
+        <a href="about.html">About</a>
+      </li>
+      <li>
+        <a href="midterm.html">Initial Analysis (midterm)</a>
+      </li>
+      <li>
+        <a href="interactive_viz.html">Interactive Visualization (A5)</a>
+      </li>
+      <li>
+        <a href="https://jsc370.github.io/jsc370-2023/">JSC370 Homepage</a>
+      </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container -->
+      </div><!--/.navbar -->
+        
+      <h1 class="title">Election in the United States</h1>
+      
+         <!-- readthedown authors -->
+   <div id="sidebar">
+    <h2><a href="#content">Election in the United States</a></h2>
+    <div id="toc">
+      <ul>
+      <li><a href="#introduction"
+      id="toc-introduction">Introduction</a></li>
+      <li><a href="#data-prepare" id="toc-data-prepare">Data
+      Prepare</a></li>
+      <li><a href="#data-exploration" id="toc-data-exploration">Data
+      Exploration</a></li>
+      <li><a href="#conclusions"
+      id="toc-conclusions">Conclusions</a></li>
+      <li><a href="#limitations-and-future-steps"
+      id="toc-limitations-and-future-steps">Limitations and Future
+      Steps</a></li>
+      </ul>
+    </div>
+    <div id="postamble" data-toggle="wy-nav-shift" class="status">
+                  <p class="author"><span class="glyphicon glyphicon-user"></span> Zhenyu
+Wang</p>
+                      </div>
+   </div>
+     
+
+   
+      
+   
+<!-- Don't indent these lines or it will mess pre blocks indentation --> 
+<div id="main">
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Democracy is the worst form of government except for all those other
+forms that have been tried from time to time. —Sir Winston Leonard
+Spencer Churchill</p>
+<p>Democracy is often touted as the best system of governance, as it
+provides citizens with a voice in decision-making and a mechanism for
+holding their leaders accountable. However, the pattern of democracy
+varies greatly across different countries and regions, with some nations
+thriving under a robust democratic system while others struggle to
+maintain even the most basic democratic institutions. With the help of
+data science, we will explore the patterns of democracy across the
+globe. In particular, there are two democratic systems that are quite
+representative in the whole world.</p>
+<p>American democracy is often seen as a model for other countries
+around the world. The United States is one of the oldest and most stable
+democracies in the world, and its democratic institutions and traditions
+have been emulated by many other countries. However, American democracy
+has also faced challenges and criticisms, particularly in recent years.
+The country’s deep political polarization and fairness of voting system
+have raised concerns about the health of American democracy.</p>
+<p>Elections is the basement of any democratic systems around the world.
+They provide a mechanism for citizens to choose their representatives,
+participate in the political process, and hold their leaders
+accountable. Election is also a friendly way to use data science to
+analyze, as its data format is mostly numbers.</p>
+<p>Therefore, we will look into election datasets for both countries and
+discover the pattern of their democratic systems in this report. In the
+first stage, we will focus on USA only as its information is profound
+enough.</p>
+</div>
+<div id="data-prepare" class="section level2">
+<h2>Data Prepare</h2>
+<div id="data-collection" class="section level3">
+<h3>Data Collection</h3>
+<p>The USA election datasets we used are downloaded from <a
+href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX"><code>Harvard Dataverse</code></a>.
+There are 3 datasets for the USA, their basic information are desribed
+in the followring tables. We call dataset to in this way
+{country}<em>{level}</em>{office}, for example,
+<code>usa_county_president</code> means dataset president election in
+the United States, and voting counts are stored for each county.</p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 1. Summary of the USA Election Datasets
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Dataset
+</th>
+<th style="text-align:right;">
+Numberof.Rows
+</th>
+<th style="text-align:right;">
+Number.of.Columns
+</th>
+<th style="text-align:right;">
+Version
+</th>
+<th style="text-align:right;">
+Year..Start.
+</th>
+<th style="text-align:right;">
+Year..End.
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+usa_county_president
+</td>
+<td style="text-align:right;">
+72617
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+20220315
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+2020
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+usa_state_senate
+</td>
+<td style="text-align:right;">
+3629
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+20210114
+</td>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:right;">
+2020
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+usa_state_president
+</td>
+<td style="text-align:right;">
+4287
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+20210113
+</td>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:right;">
+2020
+</td>
+</tr>
+</tbody>
+</table>
+<p>They stored in tab seperated format, we use <code>read.table</code>
+function in R to load them.</p>
+<p>Also, we use <code>httr</code> and <code>polite</code> R packages to
+scrape data about the winners in presidential election in the United
+States. Because of the <a
+href="https://en.wikipedia.org/wiki/United_States_Electoral_College"><code>Electoral College system</code></a>
+in the USA, the winner of population voting counts are not necessarily
+the winner, so we need to scrape them from wikipedia for more
+comprehensive analysis.</p>
+</div>
+<div id="dataset-clean" class="section level3">
+<h3>Dataset Clean</h3>
+<p>We want to go through each column in three datasets, including some
+political terms.</p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 2. Description of Columns in the USA Election Datasets
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Dataset
+</th>
+<th style="text-align:left;">
+Column
+</th>
+<th style="text-align:left;">
+Description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+USA_President_County
+</td>
+<td style="text-align:left;">
+{county, state}_fips
+</td>
+<td style="text-align:left;">
+FIPS stands for ‘Federal Information Processing Standard’, ‘County FIPS’
+refers to a unique code assigned by the federal government to each
+county in the United States and its territories
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_President_County
+</td>
+<td style="text-align:left;">
+version
+</td>
+<td style="text-align:left;">
+Version of the datset, we use the newest (20220315)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_President_County
+</td>
+<td style="text-align:left;">
+mode
+</td>
+<td style="text-align:left;">
+Voting Methods
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_Senate_State
+</td>
+<td style="text-align:left;">
+state_cen
+</td>
+<td style="text-align:left;">
+State Code for the US Census Bureau’s geographic census center
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_Senate_State
+</td>
+<td style="text-align:left;">
+state_ic
+</td>
+<td style="text-align:left;">
+State identification code used by the Federal Election Commission (FEC)
+to identify political committees based in a particular state
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_Senate_State
+</td>
+<td style="text-align:left;">
+writein
+</td>
+<td style="text-align:left;">
+An voting option where a voter can manually write in the name of a
+candidate they wish to vote for, rather than selecting a pre-printed
+name on the ballot
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_Senate_State
+</td>
+<td style="text-align:left;">
+stage
+</td>
+<td style="text-align:left;">
+Stages of an election (general, primary, runoff)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+USA_Senate_State
+</td>
+<td style="text-align:left;">
+special
+</td>
+<td style="text-align:left;">
+Special elections fill vacancies that occur when a member of the House
+of Representatives dies or resigns before the biennial general election
+</td>
+</tr>
+</tbody>
+</table>
+<p>And also the data clean procedures:</p>
+<ul>
+<li>Drop data points that are not useful
+<ul>
+<li>Unofficial election results</li>
+<li>Invalid Ballot</li>
+<li>Columns that only contain a single value (See the table)</li>
+</ul></li>
+</ul>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 3. Columns that only contain a single in the datasets
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Dataset
+</th>
+<th style="text-align:left;">
+Columns
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+usa_county_president
+</td>
+<td style="text-align:left;">
+office, version
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+usa_state_senate
+</td>
+<td style="text-align:left;">
+office, district, mode, version
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+usa_state_president
+</td>
+<td style="text-align:left;">
+office, version, notes
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Convert data types to numeric/boolean if possible</p></li>
+<li><p>We also clean up the election winner dataset (scraped from
+wikipedia) to contains two columns only for simplicity, the year of the
+elelction and the winning party.</p></li>
+</ul>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 4. National Winner of Presidential Election in the United States
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+national_DEMOCRAT_win
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1980
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1984
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1988
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1992
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1996
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2004
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Merge Datasets that shared the same attributes for easier future
+analysis
+<ul>
+<li><code>usa_president_result</code>: A dataset that contains president
+election result in both state and county level. Notice that, for data
+point in state level, we set <code>county_name</code> to be
+<code>NaN</code> for simplicty.</li>
+<li><code>usa_state_level_result</code>: A dataset that contains both
+senate and presidential election results, but only in state level.</li>
+</ul></li>
+</ul>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 5. Example of usa_state_level_result dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:left;">
+candidate
+</th>
+<th style="text-align:left;">
+party_detailed
+</th>
+<th style="text-align:right;">
+candidatevotes
+</th>
+<th style="text-align:right;">
+totalvotes
+</th>
+<th style="text-align:left;">
+office
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+ARIZONA
+</td>
+<td style="text-align:left;">
+SAM STEIGER
+</td>
+<td style="text-align:left;">
+REPUBLICAN
+</td>
+<td style="text-align:right;">
+321236
+</td>
+<td style="text-align:right;">
+741210
+</td>
+<td style="text-align:left;">
+US SENATE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+ARIZONA
+</td>
+<td style="text-align:left;">
+WM. MATHEWS FEIGHAN
+</td>
+<td style="text-align:left;">
+INDEPENDENT
+</td>
+<td style="text-align:right;">
+1565
+</td>
+<td style="text-align:right;">
+741210
+</td>
+<td style="text-align:left;">
+US SENATE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+ARIZONA
+</td>
+<td style="text-align:left;">
+DENNIS DECONCINI
+</td>
+<td style="text-align:left;">
+DEMOCRAT
+</td>
+<td style="text-align:right;">
+400334
+</td>
+<td style="text-align:right;">
+741210
+</td>
+<td style="text-align:left;">
+US SENATE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+ARIZONA
+</td>
+<td style="text-align:left;">
+ALLAN NORWITZ
+</td>
+<td style="text-align:left;">
+LIBERTARIAN
+</td>
+<td style="text-align:right;">
+7310
+</td>
+<td style="text-align:right;">
+741210
+</td>
+<td style="text-align:left;">
+US SENATE
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+ARIZONA
+</td>
+<td style="text-align:left;">
+BOB FIELD
+</td>
+<td style="text-align:left;">
+INDEPENDENT
+</td>
+<td style="text-align:right;">
+10765
+</td>
+<td style="text-align:right;">
+741210
+</td>
+<td style="text-align:left;">
+US SENATE
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 6. Example of usa_president_result dataset
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:left;">
+county_name
+</th>
+<th style="text-align:left;">
+candidate
+</th>
+<th style="text-align:left;">
+party
+</th>
+<th style="text-align:right;">
+candidatevotes
+</th>
+<th style="text-align:right;">
+totalvotes
+</th>
+<th style="text-align:left;">
+office
+</th>
+<th style="text-align:right;">
+county_fips
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+ALABAMA
+</td>
+<td style="text-align:left;">
+AUTAUGA
+</td>
+<td style="text-align:left;">
+AL GORE
+</td>
+<td style="text-align:left;">
+DEMOCRAT
+</td>
+<td style="text-align:right;">
+4942
+</td>
+<td style="text-align:right;">
+17208
+</td>
+<td style="text-align:left;">
+US PRESIDENT
+</td>
+<td style="text-align:right;">
+1001
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+ALABAMA
+</td>
+<td style="text-align:left;">
+AUTAUGA
+</td>
+<td style="text-align:left;">
+GEORGE W. BUSH
+</td>
+<td style="text-align:left;">
+REPUBLICAN
+</td>
+<td style="text-align:right;">
+11993
+</td>
+<td style="text-align:right;">
+17208
+</td>
+<td style="text-align:left;">
+US PRESIDENT
+</td>
+<td style="text-align:right;">
+1001
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+ALABAMA
+</td>
+<td style="text-align:left;">
+AUTAUGA
+</td>
+<td style="text-align:left;">
+RALPH NADER
+</td>
+<td style="text-align:left;">
+GREEN
+</td>
+<td style="text-align:right;">
+160
+</td>
+<td style="text-align:right;">
+17208
+</td>
+<td style="text-align:left;">
+US PRESIDENT
+</td>
+<td style="text-align:right;">
+1001
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+ALABAMA
+</td>
+<td style="text-align:left;">
+AUTAUGA
+</td>
+<td style="text-align:left;">
+OTHER
+</td>
+<td style="text-align:left;">
+OTHER
+</td>
+<td style="text-align:right;">
+113
+</td>
+<td style="text-align:right;">
+17208
+</td>
+<td style="text-align:left;">
+US PRESIDENT
+</td>
+<td style="text-align:right;">
+1001
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+ALABAMA
+</td>
+<td style="text-align:left;">
+BALDWIN
+</td>
+<td style="text-align:left;">
+AL GORE
+</td>
+<td style="text-align:left;">
+DEMOCRAT
+</td>
+<td style="text-align:right;">
+13997
+</td>
+<td style="text-align:right;">
+56480
+</td>
+<td style="text-align:left;">
+US PRESIDENT
+</td>
+<td style="text-align:right;">
+1003
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Create a new dataframe winning party in each county/state by
+comparing votes.</li>
+</ul>
+</div>
+</div>
+<div id="data-exploration" class="section level2">
+<h2>Data Exploration</h2>
+<p>Data exploration of USA election data can provide valuable insights
+into the patterns and trends of American voting behavior. By analyzing
+various factors such as voter turnout, demographic characteristics, and
+geographic distribution of votes, we can gain a deeper understanding of
+how elections are won and lost in the United States. We are going to
+perform the data exploration through answering the following
+questions.</p>
+<ul>
+<li>Are there any minor political parties in the USA, what is their
+importance through out the years?</li>
+<li>What is the temporal dynamics or patterns of thes elections?</li>
+<li>What are some “battle states”, “bellwether states”, “safe states” in
+the elections?</li>
+</ul>
+<p>These questions will cover 3 perspectives of the elections:
+organizational, temporal and spatial.</p>
+<div id="minor-political-parties" class="section level3">
+<h3>Minor Political Parties</h3>
+<p>In the United States, there are a number of minor political parties
+that operate alongside the two major parties, the Democratic and
+Republican parties. These minor parties often represent specific
+ideologies or issues that are not fully addressed by the major parties.
+It is commmonly argued that these parties generally have little chance
+of winning any elections.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-23-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>From the figure 1, we can tell that there were more than 20 parties
+particpating in every election. The peak number of parties participating
+elections would be above 40. Notice that this figure includes both
+senate and presidential election, so there is some fluncation pattern.
+We can tell from this pattern that more parties participating in the
+presidential elections than the senate elections.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-24-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>Firgure 2 depecits the proportion of votes that the minor parties got
+from the senate elections. From this figure, we can tell that despite
+more than 20 parties participating in the election, but it is hard for
+them to get even more than 1% population votes. So we can verify that
+minor parties are mostly negligible.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-26-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>Firgure 3 depecits the voting count of the minor parties got from the
+presidential elections. Surprisingly, in 1992, minor party candidates
+got about 20,000,000 population votes, which is an outlier in this
+figure. And we want to look into this year in details.</p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 7. Presidential Election Result in 1992
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+party_detailed
+</th>
+<th style="text-align:right;">
+total
+</th>
+<th style="text-align:left;">
+candidate
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+LIBERTARIAN
+</td>
+<td style="text-align:right;">
+280848
+</td>
+<td style="text-align:left;">
+MARROU, ANDRE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+INDEPENDENT
+</td>
+<td style="text-align:right;">
+19829462
+</td>
+<td style="text-align:left;">
+PEROT, ROSS
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+REPUBLICAN
+</td>
+<td style="text-align:right;">
+38798913
+</td>
+<td style="text-align:left;">
+BUSH, GEORGE H.W.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DEMOCRAT
+</td>
+<td style="text-align:right;">
+44856747
+</td>
+<td style="text-align:left;">
+CLINTON, BILL
+</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/Users/apple/R/ross.webp" alt="Ross Perot" /> From table
+7, we can tell that independent candidate Perot Ross got 19,829,462
+population votes in total. He was a businessman and political candidate.
+He focused on reducing the national debt, promoting free trade, and
+government reform. From this, we can tell that these issues are very
+trendy at that time. This campaign served as a notable example of
+third-party candidates in American politics.</p>
+<p>In general, despite the limited success in winning elections, minor
+parties and independent candidates have had an impact on American
+politics by raising awareness about specific issues and pushing the
+major parties to adopt certain policies or take a stand on certain
+issues. There are outliers like Perot Ross who could take advantage of
+political situation and personal charisma, wrote a remarkable chapter in
+the United States democratic history.</p>
+</div>
+<div id="dynamics-of-elections" class="section level3">
+<h3>Dynamics of Elections</h3>
+<p>This part focus on temporal dynamic of election result using map. The
+temporal dynamic of US elections refers to how the patterns and
+behaviors of voters, campaigns, and outcomes change over time across
+various election cycles. Understanding the temporal dynamics of US
+elections is important for predicting and interpreting election
+outcomes, as well as for explaining the success or failure of the
+democracy in the United States.</p>
+<div id="presidential-election" class="section level4">
+<h4>Presidential Election</h4>
+<p><img src="midterm_files/figure-html/unnamed-chunk-32-1.gif" width="700px" style="display: block; margin: auto;" /></p>
+<p>The animation 1 is a heatmap that visualized dynamics of presidential
+election results by each state. The color indicates the the difference
+voting proportions between the democratic party and the republian party.
+The deeper color it has, the more votes democratic party won. In
+general, we can see that the dynamics of election results differed state
+by state. It is affected by both big weather in the election year and
+the local condition itself. From example, if we zoom in 1984
+presidential election, the whole map is in a light color, which means
+the republican party won this election by a landslide.</p>
+<p>When we look into 1984, President Ronald Reagan win re-election in a
+landslide over Democratic challenger Walter Mondale. Reagan won 49 out
+of 50 states and carried 58.8% of the popular vote. The election is
+notable for being one of the largest electoral landslides in American
+history.</p>
+<p>As the heatmap is plot with continous color (by voting proportion
+difference), we can tell if the transitions between elections are
+smooth. In general, the transitions are continous, as there is no big
+jump from light color to deep color in a single time stamp. And the
+transitions (not the result) of each state in general formed and matched
+with the whole country.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-36-1.gif" width="700px" style="display: block; margin: auto;" /></p>
+<p>The animation 2 is visualized dynamics of presidential election
+results by each state, with only the information about the winner
+included. One interesting observation is that if a state changed its
+election outcome (for example, red-&gt;blue), it is very likely that its
+neighboring states also changed their outcome in this election. Or its
+neighboring states have already been in blue color the previous election
+result.</p>
+<p>From this, we may conclude that the political weather is in one state
+is highly correlated with its neighboring states. States may share
+political and social ties with their neighbors, such as common cultural
+backgrounds, shared histories, or migration patterns.</p>
+</div>
+<div id="senate-election" class="section level4">
+<h4>Senate Election</h4>
+<p><img src="midterm_files/figure-html/unnamed-chunk-40-1.png" width="700px" style="display: block; margin: auto;" />
+In this section, we ploted population voting count in the whole country
+in bar plots. Figure 4.1 is for the presidential election, and figure
+4.2 is for the senate election. We can tell that after 2008, democratic
+party always gain more population votes (not necessarily won) in
+presidential election. And we can also see a increasing trend of total
+voting population in the presidential election.</p>
+<p>As for the senate election, we can see that different states held
+election depending on depending on different year. We did not group
+them, and this is one limitation of this data analysis. But we can still
+tell that democratic parties take more advantage in recent year, and
+this is a question worthwhile to investigate in.</p>
+</div>
+<div id="midterms" class="section level4">
+<h4>Midterms</h4>
+<p>In the United States, a midterm election is a type of election that
+occurs halfway through the four-year term of a sitting President.
+Midterm elections are held between two presidential elections, and they
+serve as an opportunity for voters to elect members of Congress,
+including all 435 seats in the House of Representatives and one-third of
+the 100 seats in the Senate. In this data analysis, we focus on the
+Senate election part. For example, 2016 senator election is a midterm
+for 2014 ~ 2018 presidency.</p>
+<p>Midterm elections are an important part of the American political
+system, as they provide an opportunity for voters to weigh in on
+important issues and shape the direction of the country for the
+remainder of the President’s term. By looking at midterm elections, we
+can see if people are generally satisfied with the governance in past
+two years.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-42-1.png" width="700px" style="display: block; margin: auto;" />
+In figure 5, we plotted number of states that were flipped-over in the
+midterm election. That is, their midterm senator election result is
+different with the presidential election results. And we can tell that
+the number of flipping over states is increasing with the time. In
+general, there are about 20 states got flipped over in midterm
+elections.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-44-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-46-1.gif" width="700px" style="display: block; margin: auto;" /></p>
+<p>Also, from figure 6 and animation 3, we see the geographic trend of
+flipping over in the midterm elections. In general, states had high
+chances to be flipped over in the midterm elections. The different
+voting system and strategy between presidential election could be one
+reason, people always argue the so-called “Presidential Penalty”: the
+tendency for voters to hold the President’s party accountable for the
+country’s problems and express their dissatisfaction at the ballot
+box.</p>
+</div>
+</div>
+<div id="bellwether-states-battle-states-safe-states"
+class="section level3">
+<h3>Bellwether states, Battle States, Safe States</h3>
+<p>The USA is a federal republic consisting of 50 states, each with its
+own unique history, culture, and identity. In election, different states
+tend to have different pattern. For example, California is well-known
+for its strong support for democratic party recent years, while Texas is
+like a base for republican party. We want to investigate local pattern
+through finding Bellwether states, Battle states, and Safe states. They
+are terms used to describe different categories of states in the United
+States during presidential elections.</p>
+<div id="bellwether-states" class="section level4">
+<h4>Bellwether states</h4>
+<p>Bellwether states are states that have a history of accurately
+predicting the outcome of presidential elections. These states are
+considered to be representative of the overall political mood of the
+country and are closely watched by political analysts and
+strategists.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-51-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>Figure 6 illustrated counties in the United States that have the same
+results as the presidential election in 2000-2020. We can see that most
+counties had 3 matches. This is not surprising, as we will see in the
+next section, most conties are stable (safe counties), and both
+democratic party and republican party won 3 elections in past 6
+elections. And there 8 counties that had the same output as the national
+level elections (see table 8).</p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 8. Counties that has the same winner as the national winner
+(2000-2020)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:left;">
+county_name
+</th>
+<th style="text-align:right;">
+county_fips
+</th>
+<th style="text-align:right;">
+num_matches
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+10001
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MINNESOTA
+</td>
+<td style="text-align:left;">
+CLAY
+</td>
+<td style="text-align:right;">
+27027
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MONTANA
+</td>
+<td style="text-align:left;">
+BLAINE
+</td>
+<td style="text-align:right;">
+30005
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEW HAMPSHIRE
+</td>
+<td style="text-align:left;">
+HILLSBOROUGH
+</td>
+<td style="text-align:right;">
+33011
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEW YORK
+</td>
+<td style="text-align:left;">
+ESSEX
+</td>
+<td style="text-align:right;">
+36031
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEW YORK
+</td>
+<td style="text-align:left;">
+SARATOGA
+</td>
+<td style="text-align:right;">
+36091
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WASHINGTON
+</td>
+<td style="text-align:left;">
+CLALLAM
+</td>
+<td style="text-align:right;">
+53009
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISCONSIN
+</td>
+<td style="text-align:left;">
+DOOR
+</td>
+<td style="text-align:right;">
+55029
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 9. Election Result in KENT, DELAWARE (2000-2020)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:left;">
+county_name
+</th>
+<th style="text-align:right;">
+dem_votes
+</th>
+<th style="text-align:right;">
+rep_votes
+</th>
+<th style="text-align:left;">
+county_winner
+</th>
+<th style="text-align:left;">
+national_winner
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+642
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+22790
+</td>
+<td style="text-align:right;">
+24081
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3851
+</td>
+<td style="text-align:right;">
+2004
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+23872
+</td>
+<td style="text-align:right;">
+31578
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7060
+</td>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+36392
+</td>
+<td style="text-align:right;">
+29827
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10269
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+35527
+</td>
+<td style="text-align:right;">
+32135
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+13478
+</td>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+33351
+</td>
+<td style="text-align:right;">
+36991
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+16686
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+DELAWARE
+</td>
+<td style="text-align:left;">
+KENT
+</td>
+<td style="text-align:right;">
+44552
+</td>
+<td style="text-align:right;">
+41009
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+</tbody>
+</table>
+<p>In table 9, we can take a closer look at Kent, Delaware. We can see
+no party can win by a landslide in every election. The structure of
+voting population in this county is pretty balance.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-55-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>In figure 9, we plotted the locations of these counties. And
+surprisingly, all 8 counties are in north part of the United States.
+Maybe this is next question to investigate in (why these counties are
+all in the North, what are some common features of them).</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-56-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 10. Election Result in OHIO state (1976-2020)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:right;">
+dem_votes
+</th>
+<th style="text-align:right;">
+rep_votes
+</th>
+<th style="text-align:left;">
+county_winner
+</th>
+<th style="text-align:left;">
+national_winner
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+36
+</td>
+<td style="text-align:right;">
+1976
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2009959
+</td>
+<td style="text-align:right;">
+2000626
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+87
+</td>
+<td style="text-align:right;">
+1980
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+1752414
+</td>
+<td style="text-align:right;">
+2206545
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+138
+</td>
+<td style="text-align:right;">
+1984
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+1825440
+</td>
+<td style="text-align:right;">
+2678559
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+189
+</td>
+<td style="text-align:right;">
+1988
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+1939629
+</td>
+<td style="text-align:right;">
+2416549
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+240
+</td>
+<td style="text-align:right;">
+1992
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+1984942
+</td>
+<td style="text-align:right;">
+1894310
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+291
+</td>
+<td style="text-align:right;">
+1996
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2148222
+</td>
+<td style="text-align:right;">
+1859883
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2459
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2183628
+</td>
+<td style="text-align:right;">
+2350363
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5668
+</td>
+<td style="text-align:right;">
+2004
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2741165
+</td>
+<td style="text-align:right;">
+2859764
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8877
+</td>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2940044
+</td>
+<td style="text-align:right;">
+2677820
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+12086
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2827621
+</td>
+<td style="text-align:right;">
+2661407
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+15295
+</td>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2394164
+</td>
+<td style="text-align:right;">
+2841005
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+18502
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+OHIO
+</td>
+<td style="text-align:right;">
+2679165
+</td>
+<td style="text-align:right;">
+3154834
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+</tbody>
+</table>
+<p>Figure 10 and Table 10 illustrated the bellwether states (in real
+state level). From figure 10, we can see all states matched at at least
+6 national level election outcomes. And most of them had 6-9 matches.
+There is only one lucky state that matched every outcome from 1976-2020.
+Ohio is an important state is a key swing state in presidential
+elections. It has a diverse population, with urban, suburban, and rural
+areas, and a mix of conservative and liberal voters. This has made Ohio
+a track record of accurately predicting the outcome of presidential
+elections.</p>
+</div>
+</div>
+<div id="battle-states-safe-states" class="section level3">
+<h3>Battle States, Safe States</h3>
+<p>A “safe state” is a state where one political party consistently wins
+the majority of votes in presidential elections. These states are often
+referred to as “solid” or “secure” for one party. On the other hand, a
+“battle state” is a state where the outcome of the election is less
+predictable and where the two major political parties are competitive in
+terms of vote share. Notice that “battle state” is similar to
+“bellwether states” given the swing presidential election results recent
+years.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-61-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>In this section, we define a “turn-over”. A “turn-over” means the
+election result got flipped over. Let’s say from year 1-5, the winning
+party for state X is D, D, R, R, D, the number of turn-overs is 2 (2nd
+year -&gt; 3rd year; 4th year -&gt; 5th year). And we use this quantity
+to determine if a state is battle ground or a safe state.</p>
+<p>Figure 11 illustrated distribution of number of turn-overs in each
+county in presidential election. The result is straightforward that most
+counties only voted for one party from 2000-2020 and had no
+turn-overs.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-62-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>We visualized their location in Figure 12. Not surprisingly, the
+middle part if covered with red, but boundaries are covered with blue.
+This means most part of the United States has been stablized in county
+level.</p>
+<p><img src="midterm_files/figure-html/unnamed-chunk-63-1.png" width="700px" style="display: block; margin: auto;" /></p>
+<p>In figure 13, we illustrated distribution of number of turn-overs in
+each state in presidential election. We can say that most parties did
+not have any turn overs. Once a state has established a consistent
+voting pattern, it can be self-reinforcing, as voters tend to identify
+with a particular party and vote accordingly in future elections.</p>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 11. Election Result in PINELLAS, FLORIDA state (2000-2020)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+county_name
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:right;">
+dem_votes
+</th>
+<th style="text-align:right;">
+rep_votes
+</th>
+<th style="text-align:left;">
+county_winner
+</th>
+<th style="text-align:left;">
+national_winner
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+700
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+200630
+</td>
+<td style="text-align:right;">
+184825
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3909
+</td>
+<td style="text-align:right;">
+2004
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+225460
+</td>
+<td style="text-align:right;">
+225686
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7118
+</td>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+248299
+</td>
+<td style="text-align:right;">
+210066
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10327
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+239104
+</td>
+<td style="text-align:right;">
+213258
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+13536
+</td>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+233701
+</td>
+<td style="text-align:right;">
+239201
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+16744
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+PINELLAS
+</td>
+<td style="text-align:left;">
+FLORIDA
+</td>
+<td style="text-align:right;">
+277450
+</td>
+<td style="text-align:right;">
+276209
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+</tbody>
+</table>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Table 12. Election Result in IOWA state (2000-2020)
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:right;">
+dem_votes
+</th>
+<th style="text-align:right;">
+rep_votes
+</th>
+<th style="text-align:left;">
+county_winner
+</th>
+<th style="text-align:left;">
+national_winner
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1192
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+638517
+</td>
+<td style="text-align:right;">
+634373
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4401
+</td>
+<td style="text-align:right;">
+2004
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+741898
+</td>
+<td style="text-align:right;">
+751957
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7610
+</td>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+828940
+</td>
+<td style="text-align:right;">
+682379
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10819
+</td>
+<td style="text-align:right;">
+2012
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+822544
+</td>
+<td style="text-align:right;">
+730617
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+14028
+</td>
+<td style="text-align:right;">
+2016
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+653669
+</td>
+<td style="text-align:right;">
+800983
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+17236
+</td>
+<td style="text-align:right;">
+2020
+</td>
+<td style="text-align:left;">
+IOWA
+</td>
+<td style="text-align:right;">
+759061
+</td>
+<td style="text-align:right;">
+897672
+</td>
+<td style="text-align:left;">
+Republican
+</td>
+<td style="text-align:left;">
+Democratic
+</td>
+</tr>
+</tbody>
+</table>
+<p>Among all these “safe states”, Iowa and Pinellas, Florida are two
+outliers in state level and county level. In table 11 and 12, we saw
+their presidential election results from 2000-2020. Although they are
+not bellwether states (they changed, but in an opposite way). We can
+also see that no party can win by a large amount too.</p>
+<p>The USA and many other democratic countries had the trend that
+states/counties consistently vote for the same party, this could lead to
+the trend a lack of balance in the government. Additionally, political
+polarization and the tendency of people to seek out information that
+confirms their existing beliefs can make it difficult to bridge the
+divide between parties and promote a diversity of perspectives.</p>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>In this report, we have completed the data prepare and data
+exploration of the United States election data through answering three
+key questions. Through the data exploration, we had a better
+understanding on each level of the election system and its temporal and
+spatial dynamics. We have also learned about the recent events in the
+elections including famous politicians and social issues.</p>
+<p>We have some main findings on election dynamics. Two major parties
+are still dominating elections most of times, where other independent
+candidates or minor parties were not able to change the status quo. In
+recent election, the Democratic party was having more population votes,
+but due to the electoral college system, this advantage may not turn
+into the real victory. There are some patterns we can tell from the
+change of the election map. From example, the changes of voting count
+were “continuous” and neighboring regions were more likely to have
+impacts on each other. The majority of the states and the counties are
+“safe states”, only a few regions are really making a difference to the
+national level election results.</p>
+<p>Despite of all these findings, the American election system is a
+complex and multi-layered process that can be difficult to fully
+understand just like the democratic system itself.</p>
+</div>
+<div id="limitations-and-future-steps" class="section level2">
+<h2>Limitations and Future Steps</h2>
+<p>There are many limitations in this report. I will list the most
+important ones. First, most of the findings focus on the population
+winner of the election, but it is the electoral college system
+determined the winner. Second, different states held their senator
+elections in different years (because it is held every 6 years),
+however, we did not group them by their year of election, some results
+could be misleading. Third, we focus mostly on which party won the
+election instead of the candidates which could be very important in
+determining the election outcomes.</p>
+<p>In the future, we want to look into above limitations. Also, compare
+and contrast the results between the United States and India. Indian
+democracy is the world’s largest democracy and has been an important
+model for many other countries and has inspired other developing
+countries, particularly in South Asia and Africa, and the country has
+been active in promoting democratic values and institutions globally.
+However, according to some <a
+href="https://www.journalofdemocracy.org/articles/indias-endangered-democracy/">analysis</a>,
+Indian’s political system is failing due to corruption, caste
+discrimination, religious tensions, and electoral violence. By looking
+at two examples, we will gain a more comprehensive view on the world’s
+democracy.</p>
+</div>
+</div>
+
+   
+   
+            
+      
+
+  <script>
+    $(document).ready(function () {
+
+			
+ 		
+	    });
+  </script>
+
+
+
+    <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+	var script = document.createElement("script");
+	script.type = "text/javascript";
+	script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+	document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+  
+</body>
+</html>

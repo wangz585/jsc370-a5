@@ -1,11 +1,15 @@
-name: "my-website"
+name: "U.S Election"
 output_dir: "docs"
 navbar:
-  title: "My Website"
+  title: "U.S Election"
   left:
     - text: "Home"
       href: index.html
     - text: "About"
       href: about.html
-    - text: "Interactive Visualization"
+    - text: "Initial Analysis (midterm)"
+      href: midterm.html
+    - text: "Interactive Visualization (A5)"
       href: interactive_viz.html
+    - text: "JSC370 Homepage"
+      href: https://jsc370.github.io/jsc370-2023/

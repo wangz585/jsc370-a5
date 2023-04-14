@@ -1,5 +1,5 @@
 ---
-title: "Interactive Visualization of the US election"
+title: "Interactive Visualization"
 output: html_document
 ---
 
@@ -42,14 +42,12 @@ usa_state_president <- read.table(
   sep="\t", header=TRUE)
 ```
 
-The USA election datasets we used are downloaded from [`Harvard Dataverse`](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX). There are 3 datasets for the USA, their basic information are desribed in the followring tables. We call dataset to in this way {country}_{level}_{office}, for example, `usa_county_president` means dataset president election in the United States, and voting counts are stored for each county.
-
 ```{r, eval = FALSE, include=FALSE}
 dim(usa_state_president)
 min(usa_state_president$year)
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 myTable <- data.frame(Dataset = c("usa_county_president", "usa_state_senate", "usa_state_president"),
                       `Numberof Rows` = c(72617, 3629, 4287),
                       `Number of Columns` = c(12, 19, 15), 
@@ -61,9 +59,6 @@ kable(myTable, "html", caption = "Table 1. Summary of the USA Election Datasets"
                 full_width = FALSE)
 
 ```
-They stored in tab seperated format, we use `read.table` function in R to load them.
-
-Also, we use `httr` and `polite` R packages to scrape data about the winners in presidential election in the United States. Because of the [`Electoral College system`](https://en.wikipedia.org/wiki/United_States_Electoral_College) in the USA, the winner of population voting counts are not necessarily the winner, so we need to scrape them from wikipedia for more comprehensive analysis.
 
 ```{r, include=FALSE}
 # To scrape data
@@ -79,11 +74,7 @@ election_winners <-
   clean_names()
 ```
 
-### Dataset Clean
-
-We want to go through each column in three datasets, including some political terms.
-
-```{r, echo=FALSE}
+```{r, include=FALSE}
 
 myTable <- data.frame(Dataset = c("USA_President_County", "USA_President_County", "USA_President_County", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State", "USA_Senate_State"),
                       `Column` = c("{county, state}_fips", "version", "mode", "state_cen", "state_ic", "writein", "stage", "special"),
@@ -91,16 +82,7 @@ myTable <- data.frame(Dataset = c("USA_President_County", "USA_President_County"
 kable(myTable, "html", caption = "Table 2. Description of Columns in the USA Election Datasets") %>%
   kable_styling(bootstrap_options = "striped", 
                 full_width = FALSE)
-```
 
-And also the data clean procedures:
-
-- Drop data points that are not useful
-  - Unofficial election results
-  - Invalid Ballot
-  - Columns that only contain a single value (See the table)
-
-```{r, echo=FALSE}
 myTable <- data.frame(Dataset = c("usa_county_president", "usa_state_senate", "usa_state_president"),
                       `Columns` = c("office, version", "office, district, mode, version", "office, version, notes"))
 kable(myTable, "html", caption = "Table 3. Columns that only contain a single in the datasets") %>%
@@ -108,9 +90,6 @@ kable(myTable, "html", caption = "Table 3. Columns that only contain a single in
                 full_width = FALSE)
 
 ```
-  
-- Convert data types to numeric/boolean if possible
-
 
 ```{r, include=FALSE, eval=FALSE}
 colnames(usa_state_president)
@@ -118,7 +97,6 @@ subset(usa_state_senate, special == "True")
 unique(usa_state_senate$special)
 usa_state_senate$writein
 ```
-
 
 ```{r, include=FALSE}
 # Single columns
@@ -139,7 +117,6 @@ for (i in df_list) {
 }
 ```
 
-
 ```{r,  include=FALSE}
 # Drop uncessary columns, most columns here have the same value or dupliacted meeaning
 usa_county_president <- usa_county_president %>% select(-version)
@@ -153,8 +130,6 @@ usa_state_senate <- subset(usa_state_senate, unofficial == "False")
 usa_state_senate <- usa_state_senate %>% select(-unofficial)
 ```
 
-- We also clean up the election winner dataset (scraped from wikipedia) to contains two columns only for simplicity, the year of the elelction and the winning party.
-
 ```{r, include=FALSE}
 election_winners$national_DEMOCRAT_win = election_winners$winner_and_party_2 == "Dem."
 election_winners$year = election_winners$election
@@ -166,7 +141,7 @@ election_winners$year <- as.integer(election_winners$year)
 ind_tab <- election_winners
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 kable(election_winners, "html", caption = "Table 4. National Winner of Presidential Election in the United States") %>%
   kable_styling(bootstrap_options = "striped", 
                 full_width = FALSE
@@ -174,10 +149,6 @@ kable(election_winners, "html", caption = "Table 4. National Winner of President
   
 ```
 
-- Merge Datasets that shared the same attributes for easier future analysis
-  - `usa_president_result`: A dataset that contains president election result in both state and county level. Notice that, for data point in state level, we set `county_name` to be `NaN` for simplicty.
-  - `usa_state_level_result`: A dataset that contains both senate and presidential election results, but only in state level.
-  
 ```{r, include=FALSE}
 # Have a common dataset with common attributes for simpler future analysis
 common_col_names = c("year", "state", "candidate", "party_detailed", "candidatevotes", "totalvotes", "office")
@@ -193,19 +164,17 @@ common_col_names = c("year", "state", "county_name", "candidate", "party", "cand
 usa_president_result <- rbind(usa_county_president[, common_col_names], usa_state_president[, common_col_names])
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 kable(head(usa_state_level_result,n = 5), "html", caption = "Table 5. Example of usa_state_level_result dataset") %>%
   kable_styling(bootstrap_options = "striped", 
                 full_width = FALSE)
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 kable(head(usa_president_result,n=5), "html", caption = "Table 6. Example of usa_president_result dataset") %>%
   kable_styling(bootstrap_options = "striped", 
                 full_width = FALSE)
 ```
-
-- Create a new dataframe winning party in each county/state by comparing votes.
 
 ```{r, include=FALSE}
 # Create data frame of county winner
@@ -219,7 +188,7 @@ usa_president_winner_county <- usa_president_result %>%
   unique()
 ```
 
-### Interactive Visualizations
+### Map
 
 ```{r, include=FALSE}
 library(plotly)
@@ -366,6 +335,8 @@ usa_president_total_rep <- usa_state_president %>%
 usa_president_total<-merge(usa_president_total_dem,usa_president_total_rep,by="year")
 ```
 
+### Multi-Line Plot
+
 ```{r, echo=FALSE}
  usa_president_total |>
   plot_ly() |>
@@ -382,7 +353,6 @@ usa_president_total<-merge(usa_president_total_dem,usa_president_total_rep,by="y
   ) %>% layout(title = "Population Votes of Presidential Elections", xaxis = list(title = "Election Year"), yaxis = list(title = "Vote Count"))
 ```
 
-
 ```{r, warning=FALSE, message=FALSE, include=FALSE}
 usa_state_president_major_party <- usa_state_president %>%
   group_by(state, year) %>%
@@ -395,6 +365,8 @@ usa_state_president_major_party <- usa_state_president %>%
   column_to_rownames("state") %>%
   as.matrix()
 ```
+
+### Heatmap
 
 ```{r, echo=FALSE}
 #colorScale <- colorRamp(c("blue", "red"))
