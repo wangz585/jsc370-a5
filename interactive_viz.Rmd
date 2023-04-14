@@ -233,10 +233,22 @@ vote_count_1976 <- usa_state_president %>%
   select(state_po, candidatevotes) %>%
   group_by(state_po) %>% 
   summarise(votes = sum(candidatevotes))
+
+vote_count_2000 <- usa_state_president %>%
+  subset(year == 2000) %>%
+  select(state_po, candidatevotes) %>%
+  group_by(state_po) %>% 
+  summarise(votes = sum(candidatevotes))
+
+vote_count_2020 <- usa_state_president %>%
+  subset(year == 2020) %>%
+  select(state_po, candidatevotes) %>%
+  group_by(state_po) %>% 
+  summarise(votes = sum(candidatevotes))
 ```
 
-```{r, echo=FALSE}
-vote_count_1976 |>
+```{r, include=FALSE}
+map_1976 <- vote_count_1976 |>
   plot_geo(
     locationmode = "USA-states"
   ) |>
@@ -255,4 +267,87 @@ vote_count_1976 |>
   colorbar(
     title = "Total Votes"
   )
+```
+
+```{r, include=FALSE}
+map_2000 <- vote_count_2000 |>
+  plot_geo(
+    locationmode = "USA-states"
+  ) |>
+  add_trace(
+    z = ~ votes,
+    locations = ~ state_po,
+    coloraxis = "coloraxis"
+  ) |>
+  layout(
+    title = "Vote Count in the USA in 2000 (by state)",
+    geo = list(
+      scope = "usa",
+      showlakes = TRUE,
+      lakecolor = toRGB("steelblue")
+    ) ) |>
+  colorbar(
+    title = "Total Votes"
+  )
+```
+
+```{r, include=FALSE}
+map_2020 <- vote_count_2020 |>
+  plot_geo(
+    locationmode = "USA-states"
+  ) |>
+  add_trace(
+    z = ~ votes,
+    locations = ~ state_po,
+    coloraxis = "coloraxis"
+  ) |>
+  layout(
+    title = "Vote Count in the USA",
+    geo = list(
+      scope = "usa",
+      showlakes = TRUE,
+      lakecolor = toRGB("steelblue")
+    ) ) |>
+  colorbar(
+    title = "Total Votes"
+  )
+```
+
+```{r, echo=FALSE}
+titles <- list(
+  list( 
+    x = 0.5,  
+    y = 1.0,  
+    text = "1976",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),  
+  list( 
+    x = 0.5,  
+    y = .63,  
+    text = "2000",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  ),  
+  list( 
+    x = 0.5,  
+    y = .3,  
+    text = "2020",  
+    xref = "paper",  
+    yref = "paper",  
+    xanchor = "center",  
+    yanchor = "bottom",  
+    showarrow = FALSE 
+  )
+)
+subplot(map_1976, map_2000, map_2020, nrows = 3) |>
+  layout(coloraxis = list(colorscale = "Viridis"),
+         xaxis = list(visible = TRUE),
+         annotations = titles)
 ```
